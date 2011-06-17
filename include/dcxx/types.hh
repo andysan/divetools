@@ -77,6 +77,14 @@ struct Length {
     Length(double val)
 	: val(val) {}
 
+    static Length metre(double val) {
+	return Length(val);
+    }
+
+    double metre() const {
+	return val;
+    }
+
     static Length feet(double val) {
 	return Length(DCXX_FOOT * val);
     }
