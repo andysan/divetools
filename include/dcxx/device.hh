@@ -35,7 +35,7 @@
 #include <libdivecomputer/device.h>
 
 
-#define DCXX_TRY(call)				\
+#define DCXX_DEVICE_TRY(call)			\
     do {					\
 	device_status_t status = call;		\
 	if (status != DEVICE_STATUS_SUCCESS)	\

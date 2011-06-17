@@ -124,7 +124,8 @@ void
 Device::init() throw(DeviceException)
 {
     if (device) {
-	DCXX_TRY(device_set_cancel(device, &Device::cancelCallback, (void *)this));
+	DCXX_DEVICE_TRY(
+	    device_set_cancel(device, &Device::cancelCallback, (void *)this));
 	setEventMask((unsigned int)-1);
 	
     }
@@ -133,7 +134,7 @@ Device::init() throw(DeviceException)
 void
 Device::close() throw(DeviceException)
 {
-    DCXX_TRY(device_close(device));
+    DCXX_DEVICE_TRY(device_close(device));
 }
 
 void
@@ -151,7 +152,7 @@ Device::getType()
 void
 Device::setEventMask(unsigned int events) throw(DeviceException)
 {
-    DCXX_TRY(device_set_events(device, events,
+    DCXX_DEVICE_TRY(device_set_events(device, events,
 			       &Device::eventCallback, (void *)this));
 }
 
@@ -159,33 +160,33 @@ void
 Device::setFingerprint(const void *data, unsigned int size)
     throw(DeviceException)
 {
-    DCXX_TRY(device_set_fingerprint(device, (unsigned char *)data, size));
+    DCXX_DEVICE_TRY(device_set_fingerprint(device, (unsigned char *)data, size));
 }
 
 void
 Device::version(unsigned char *data, unsigned int size) throw(DeviceException)
 {
-    DCXX_TRY(device_version(device, data, size));
+    DCXX_DEVICE_TRY(device_version(device, data, size));
 }
 
 void
 Device::read(unsigned int addr, void *data, unsigned int size)
     throw(DeviceException)
 {
-    DCXX_TRY(device_read(device, addr, (unsigned char *)data, size));
+    DCXX_DEVICE_TRY(device_read(device, addr, (unsigned char *)data, size));
 }
 
 void
 Device::write(unsigned int addr, void *data, unsigned int size)
     throw(DeviceException)
 {
-    DCXX_TRY(device_write(device, addr, (unsigned char *)data, size));
+    DCXX_DEVICE_TRY(device_write(device, addr, (unsigned char *)data, size));
 }
 
 void
 Device::forEach() throw(DeviceException)
 {
-    DCXX_TRY(device_foreach(device, &Device::diveCallback, (void *)this));
+    DCXX_DEVICE_TRY(device_foreach(device, &Device::diveCallback, (void *)this));
 }
 
 void

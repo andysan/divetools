@@ -50,7 +50,7 @@ DCXX_BEGIN_NS_SUUNTO
 Vyper::Vyper(const char *name) throw(DeviceException)
     : Device(), infoCacheValid(false)
 {
-    DCXX_TRY(suunto_vyper_device_open(&device, name));
+    DCXX_DEVICE_TRY(suunto_vyper_device_open(&device, name));
     init();
 }
 
@@ -101,13 +101,13 @@ Vyper::getInfo()
 void
 Vyper::setDelay(unsigned int delay) throw(DeviceException)
 {
-    DCXX_TRY(suunto_vyper_device_set_delay(device, delay));
+    DCXX_DEVICE_TRY(suunto_vyper_device_set_delay(device, delay));
 }
 
 void
 Vyper::readDive(dc_buffer_t *buffer, int init) throw(DeviceException)
 {
-    DCXX_TRY(suunto_vyper_device_read_dive(device, buffer, init));
+    DCXX_DEVICE_TRY(suunto_vyper_device_read_dive(device, buffer, init));
 }
 
 
@@ -115,14 +115,14 @@ Vyper::readDive(dc_buffer_t *buffer, int init) throw(DeviceException)
 Vyper2::Vyper2(const char *name) throw(DeviceException)
     : Device()
 {
-    DCXX_TRY(suunto_vyper2_device_open(&device, name));
+    DCXX_DEVICE_TRY(suunto_vyper2_device_open(&device, name));
     init();
 }
 
 void
 Vyper2::reset_maxdepth() throw(DeviceException)
 {
-    DCXX_TRY(suunto_vyper2_device_reset_maxdepth(device));
+    DCXX_DEVICE_TRY(suunto_vyper2_device_reset_maxdepth(device));
 }
 
 
