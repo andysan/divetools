@@ -36,7 +36,7 @@
 
 DCXX_BEGIN_NS_DC
 
-/** One foot in meter */
+/** One foot in metre */
 #define DCXX_FOOT 0.3048
 
 struct Duration {
@@ -95,7 +95,7 @@ struct Length {
 
     operator double() { return val; }
 
-    /** Length, always in meter */
+    /** Length, always in metre */
     double val;
 };
 
