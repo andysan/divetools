@@ -38,6 +38,7 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_array.hpp>
+#include <boost/scoped_array.hpp>
 
 #include "dev_common.hh"
 #include "dcconf.hh"
@@ -178,12 +179,13 @@ private:
 	length = fin.tellg();
 	fin.seekg (0, ios::beg);
 
-	char *data = new char[length];
+	boost::scoped_array<char> data;
+	data.reset(new char[length]);
 
-	fin.read(data,length);
+	fin.read(data.get(), length);
 	fin.close();
 
-	dev.setFingerprint(data, length);
+	dev.setFingerprint(data.get(), length);
     }
 
     RawDiveList dives;
