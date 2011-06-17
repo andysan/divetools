@@ -323,7 +323,7 @@ main(int argc, char **argv)
 
     parse_conf();
 
-    if (dcconf.devType == DEVICE_TYPE_NULL) {
+    if (!dcconf.devInfo) {
 	cerr << "Error: Unknown device type specified" << endl;
 	return 1;
     }
@@ -351,7 +351,7 @@ main(int argc, char **argv)
     try {
 	Callbacks callbacks;
 	boost::scoped_ptr<Device> device;
-	device.reset(devCreate(dcconf.devType, dcconf.devPort.c_str()));
+	device.reset(devCreate(dcconf.devInfo->device, dcconf.devPort.c_str()));
 	if (!device.get()) {
 	    cerr << "Error: Device type unsupported" << endl;
 	    return 1;

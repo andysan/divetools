@@ -40,6 +40,8 @@
 
 #include <dcxx/device.hh>
 
+#include "dev_common.hh"
+
 class DCConf {
 public:
     DCConf();
@@ -56,7 +58,7 @@ public:
     boost::program_options::options_description optsCommon;
 
     std::string devPort;
-    device_type_t devType;
+    const DeviceInfo *devInfo;
     unsigned int devSerial;
     bool devSerialValid;
 };

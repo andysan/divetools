@@ -41,7 +41,7 @@ using namespace std;
 
 DCConf::DCConf()
     : optsCommon(), cfgCommon(),
-      devPort(), devType(DEVICE_TYPE_NULL), devSerial(0), devSerialValid(false)
+      devPort(), devInfo(NULL), devSerial(0), devSerialValid(false)
 {
     po::options_description optsDevice("Device");
     optsDevice.add_options()
@@ -71,15 +71,15 @@ void
 DCConf::handleConf(po::variables_map vm)
 {
     if (vm.count("device.type")) {
-	device_type_t confDevType =
-	    getDevType(vm["device.type"].as<string>().c_str());
-	if (confDevType == DEVICE_TYPE_NULL) {
+	const DeviceInfo *confDevInfo =
+	    getDeviceInfo(vm["device.type"].as<string>().c_str());
+	if (!confDevInfo) {
 	    cerr << "Error: Unknown device type in configuration" << endl;
 	    exit(EXIT_FAILURE);
 	}
 
-	if (devType == DEVICE_TYPE_NULL)
-	    devType = confDevType;
+	if (!devInfo)
+	    devInfo = confDevInfo;
     }
     if (devPort.empty() && vm.count("device.port"))
 	devPort = vm["device.port"].as<string>();
@@ -95,8 +95,8 @@ DCConf::handleArgs(po::variables_map vm)
 	devPort = vm["dev-port"].as<string>();
 
     if (vm.count("dev-type")) {
-	devType = (getDevType(vm["dev-type"].as<string>().c_str()));
-	if (devType == DEVICE_TYPE_NULL) {
+	devInfo = getDeviceInfo(vm["dev-type"].as<string>().c_str());
+	if (!devInfo) {
 	    cerr << "Error: Unknown device type specified" << endl;
 	    exit(EXIT_FAILURE);
 	}
@@ -106,10 +106,10 @@ DCConf::handleArgs(po::variables_map vm)
 ostream &
 operator<<(ostream &out, const DCConf &conf)
 {
-    const char *devName = getDevName(conf.devType);
-    assert(devName);
+    assert(conf.devInfo);
+    assert(conf.devInfo->name);
     out << "[device]" << endl
-	<< "type = " << devName << endl
+	<< "type = " << conf.devInfo->name << endl
 	<< "port = " << conf.devPort << endl
 	<< "serial = " << conf.devSerial;
 }

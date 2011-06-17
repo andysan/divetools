@@ -32,16 +32,21 @@
 #define DEV_COMMON_HH
 
 #include <dcxx/device.hh>
+#include <dcxx/parser.hh>
 
 struct DeviceInfo {
-    device_type_t type;
+    device_type_t device;
+    parser_type_t parser;
     const char *name;
 };
 
-device_type_t getDevType(const char *name);
-const char *getDevName(device_type_t type);
+const DeviceInfo *getDeviceInfo(const char *devName);
+
+device_type_t getDevType(const char *devName);
+parser_type_t getParserType(const char *devName);
 
 dcxx::Device *devCreate(device_type_t type, const char *port);
+dcxx::Parser *parserCreate(parser_type_t type);
 
 extern const DeviceInfo devDevices[];
 
