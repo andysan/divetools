@@ -103,6 +103,34 @@ struct Length {
     double val;
 };
 
+struct Temperature {
+    Temperature()
+	: val(0.0) {}
+    Temperature(double val)
+	: val(val) {}
+
+    static Temperature kelvin(double val) {
+	return Temperature(val);
+    }
+
+    double kelvin() const {
+	return val;
+    }
+
+    static Temperature celsius(double val) {
+	return Temperature(273.15 + val);
+    }
+
+    double celsius() const {
+	return val - 273.15;
+    }
+
+    operator double() { return val; }
+
+    /** Temperature, always in K */
+    double val;
+};
+
 DCXX_END_NS
 
 #endif
