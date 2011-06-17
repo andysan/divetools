@@ -42,7 +42,6 @@
 
 #include "dev_common.hh"
 #include "dcconf.hh"
-#include "dcxx/suunto.hh"
 
 #define DIVE_BASE "dive_"
 
