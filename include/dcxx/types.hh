@@ -40,6 +40,8 @@ DCXX_BEGIN_NS_DC
 #define DCXX_FOOT 0.3048
 
 struct Duration {
+    Duration()
+	: val(0.0) {}
     Duration(double val)
 	: val(val) {}
 
@@ -74,6 +76,8 @@ struct Duration {
 };
 
 struct Length {
+    Length()
+	: val(0.0) {}
     Length(double val)
 	: val(val) {}
 
