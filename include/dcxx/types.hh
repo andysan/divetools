@@ -47,12 +47,24 @@ struct Duration {
 	return Duration(val);
     }
 
+    double seconds() const {
+	return val;
+    }
+
     static Duration minutes(double val) {
 	return Duration(val * 60);
     }
 
+    double minutes() const {
+	return val / 60;
+    }
+
     static Duration hours(double val) {
 	return Duration(val * 60 * 60);
+    }
+
+    double hours() const {
+	return val / 60 / 60;
     }
 
     operator double() { return val; }
