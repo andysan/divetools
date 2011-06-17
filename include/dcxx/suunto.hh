@@ -39,6 +39,7 @@
 
 #include <dcxx/utils.hh>
 #include <dcxx/device.hh>
+#include <dcxx/parser.hh>
 #include <dcxx/types.hh>
 
 #define DCXX_BEGIN_NS_SUUNTO DCXX_BEGIN_NS(suunto)
@@ -77,6 +78,13 @@ private:
 
     Info infoCache;
     bool infoCacheValid;
+};
+
+class VyperParser
+    : public Parser
+{
+public:
+    VyperParser();
 };
 
 class Vyper2

@@ -1,1 +1,1 @@
-noinst_HEADERS = device.hh suunto.hh
+noinst_HEADERS = device.hh parser.hh suunto.hh

@@ -111,6 +111,13 @@ Vyper::readDive(dc_buffer_t *buffer, int init) throw(DeviceException)
 }
 
 
+VyperParser::VyperParser()
+    : Parser()
+{
+    DCXX_PARSER_TRY(suunto_vyper_parser_create(&parser));
+    init();
+}
+
 
 Vyper2::Vyper2(const char *name) throw(DeviceException)
     : Device()
