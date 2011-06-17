@@ -32,6 +32,8 @@
 #define DCXX_TYPES_HH
 
 #include <cmath>
+#include <ostream>
+
 #include <dcxx/utils.hh>
 
 DCXX_BEGIN_NS_DC
@@ -130,6 +132,10 @@ struct Temperature {
     /** Temperature, always in K */
     double val;
 };
+
+std::ostream &operator<<(std::ostream &out, const Temperature &val);
+std::ostream &operator<<(std::ostream &out, const Length &val);
+std::ostream &operator<<(std::ostream &out, const Duration &val);
 
 DCXX_END_NS
 
