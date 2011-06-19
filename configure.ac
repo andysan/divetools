@@ -17,10 +17,17 @@ AC_CHECK_HEADER([libdivecomputer/device.h], [true], [
 AC_CHECK_LIB([divecomputer], [device_foreach], [true], [
   AC_MSG_ERROR([Failed to link agains libdivecomputer.])])
 
-AX_BOOST_BASE([1.40.0], [true],[false], [
+AX_BOOST_BASE([1.40.0], [true],[
   AC_MSG_ERROR([No suitable Boost version found])])
 AX_BOOST_PROGRAM_OPTIONS
+if test "x$BOOST_PROGRAM_OPTIONS_LIB" = "x"; then
+   AC_MSG_ERROR([Can't find Boost Program Options])
+fi
+
 AX_BOOST_FILESYSTEM
+if test "x$BOOST_FILESYSTEM_LIB" = "x"; then
+   AC_MSG_ERROR([Can't find Boost Filesystem])
+fi
 
 AC_ARG_ENABLE([strict],
   AS_HELP_STRING([--disable-strict],
