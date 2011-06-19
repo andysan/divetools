@@ -47,9 +47,11 @@ AC_CONFIG_FILES([
 
 	include/Makefile
 	include/dcxx/Makefile
+	include/serialize/Makefile
 
 	lib/Makefile
 	lib/dcxx/Makefile
+	lib/serialize/Makefile
 
 	tools/Makefile
 ])

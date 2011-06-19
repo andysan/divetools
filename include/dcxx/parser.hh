@@ -61,11 +61,16 @@ class Parser;
 
 class ParserCallbacks {
 public:
-    ParserCallbacks() {}
-    virtual ~ParserCallbacks() {}
+    friend class Parser;
+
+    ParserCallbacks();
+    virtual ~ParserCallbacks();
 
     virtual void onSample(Parser &parser,
 			  parser_sample_type_t type, parser_sample_value_t value);
+
+    virtual void onBeginSample() {};
+    virtual void onEndSample() {};
 
     virtual void onTime(Duration time) {}
     virtual void onDepth(Length depth) {}
@@ -78,6 +83,12 @@ public:
     virtual void onBearing(unsigned int bearing) {}
     virtual void onVendor(unsigned int type,
 			  unsigned int size, const void *data) {}
+
+protected:
+    void beginSample();
+    void terminateSample();
+
+    bool inSample;
 };
 
 class Parser {

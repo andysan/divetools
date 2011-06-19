@@ -1,4 +1,4 @@
-SUBDIRS=dcxx
+SUBDIRS=dcxx serialize
 
 noinst_LIBRARIES = libcommon.a
 

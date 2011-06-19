@@ -69,12 +69,25 @@ ParserException::getStatus() const throw()
     return status;
 }
 
+
+ParserCallbacks::ParserCallbacks()
+    : inSample(false)
+{
+}
+
+ParserCallbacks::~ParserCallbacks()
+{
+}
+
 void
 ParserCallbacks::onSample(Parser &parser,
-			  parser_sample_type_t type, parser_sample_value_t value)
+			  parser_sample_type_t type,
+			  parser_sample_value_t value)
 {
     switch (type) {
     case SAMPLE_TYPE_TIME:
+	terminateSample();
+	beginSample();
 	onTime(Duration::seconds(value.time));
 	break;
 
@@ -114,6 +127,21 @@ ParserCallbacks::onSample(Parser &parser,
     }
 }
 
+void
+ParserCallbacks::beginSample()
+{
+    inSample = true;
+    onBeginSample();
+}
+
+void
+ParserCallbacks::terminateSample()
+{
+    if (inSample) {
+	onEndSample();
+	inSample = false;
+    }
+}
 
 Parser::Parser(parser_t *parser)
     : parser(parser), callbacks(NULL)
@@ -160,6 +188,7 @@ Parser::forEachSample() throw(ParserException)
 {
     DCXX_PARSER_TRY(
 	parser_samples_foreach(parser, &Parser::sampleCallback, (void *)this));
+    callbacks->terminateSample();
 }
 
 Duration
