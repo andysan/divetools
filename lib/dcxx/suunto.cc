@@ -85,7 +85,10 @@ std::string
 Vyper::getPersonalInfo()
 {
     const Info &info(getInfo());
-    return std::string(info.personal, sizeof(info.personal));
+    if (info.personal[sizeof(info.personal) - 1] != '\0')
+	return std::string(info.personal, sizeof(info.personal));
+    else
+	return std::string(info.personal);
 }
 
 const Vyper::Info &
