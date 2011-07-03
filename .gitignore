@@ -10,6 +10,7 @@
 /missing
 
 /tools/dcsync
+/tools/dcvyper
 
 Makefile.in
 Makefile

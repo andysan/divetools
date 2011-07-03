@@ -1,4 +1,4 @@
-bin_PROGRAMS = dcsync
+bin_PROGRAMS = dcsync dcvyper
 
 CPPFLAGS = -I$(top_srcdir)/include $(BOOST_CPPFLAGS)
 LDFLAGS = $(BOOST_LDFLAGS)
@@ -8,3 +8,4 @@ LIBS = -ldivecomputer \
 	$(BOOST_FILESYSTEM_LIB)
 
 dcsync_SOURCES = dcsync.cc
+dcvyper_SOURCES = dcvyper.cc
