@@ -43,6 +43,8 @@
 #define SUUNTO_SWAP32(v) (SUUNTO_SWAP16((v) >> 16) | (SUUNTO_SWAP16(v) << 16))
 #endif
 
+#define VYPER_CONFIG_OFFSET 0x1E
+
 DCXX_BEGIN_NS_DC
 DCXX_BEGIN_NS_SUUNTO
 
@@ -92,7 +94,7 @@ Vyper::getInfo()
     if (infoCacheValid)
 	return infoCache;
 
-    read(0x1E, &infoCache, sizeof(infoCache));
+    read(VYPER_CONFIG_OFFSET, &infoCache, sizeof(infoCache));
     infoCacheValid = true;
 
     return infoCache;
