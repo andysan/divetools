@@ -53,11 +53,31 @@ class Vyper
 public:
     Vyper(const char *name) throw(DeviceException);
 
+    enum HardwareType {
+	HW_STINGER = 0x03,
+	HW_MOSQUITO = 0x04,
+	HW_VYPER_NEW = 0x0A,
+	HW_VYTEC = 0x0B,
+	HW_VYPER_OR_COBRA = 0x0C,
+	HW_GEKKO = 0x0D,
+    };
+
     Length getMaxDepth();
     Duration getTotalDiveTime();
     unsigned int getTotalDives();
     unsigned int getSerial();
     std::string getPersonalInfo();
+
+    HardwareType getHWType();
+    static std::string getHWTypeName(HardwareType type);
+    std::string getHWTypeName();
+    uint8_t getFWVersion();
+    uint8_t getLogInterval();
+
+    Duration getAlarmTime();
+    bool getAlarmTimeOn();
+    Length getAlarmDepth();
+    bool getAlarmDepthOn();
 
     void setDelay(unsigned int delay) throw(DeviceException);
     void readDive(dc_buffer_t *buffer, int init) throw(DeviceException);
@@ -70,8 +90,24 @@ private:
 	uint8_t hwType;
 	uint8_t fwVersion;
 	uint32_t serial;
-	uint16_t unknown;
+	uint16_t unknown0;
 	char personal[30];
+	char unknown1[7];
+	uint16_t ptrRingBuff;
+	uint8_t logInterval;
+	uint8_t modelModifiers;
+	char unknown2[7];
+	uint16_t maxFreedivingDepth;
+	uint16_t totalFreedivingTime;
+	uint8_t timeFlags;
+	uint8_t unknown3;
+	uint8_t displayUnits;
+	uint8_t model;
+	uint8_t lightSettings;
+	uint8_t alarmFlags;
+	uint16_t alarmTime;
+	uint16_t alarmDepth;
+	char unknown4[7];
     } __attribute__((packed));
 
     const Info &getInfo();

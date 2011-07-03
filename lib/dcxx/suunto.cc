@@ -45,6 +45,9 @@
 
 #define VYPER_CONFIG_OFFSET 0x1E
 
+#define VYPER_ALARM_FLAG_TIME 0x01
+#define VYPER_ALARM_FLAG_DEPTH 0x02
+
 DCXX_BEGIN_NS_DC
 DCXX_BEGIN_NS_SUUNTO
 
@@ -89,6 +92,81 @@ Vyper::getPersonalInfo()
 	return std::string(info.personal, sizeof(info.personal));
     else
 	return std::string(info.personal);
+}
+
+Vyper::HardwareType
+Vyper::getHWType()
+{
+    return (HardwareType)getInfo().hwType;
+}
+
+std::string
+Vyper::getHWTypeName(HardwareType type)
+{
+    switch (type) {
+    case HW_STINGER:
+	return "Stinger";
+
+    case HW_MOSQUITO:
+	return "Mosquito";
+
+    case HW_VYPER_NEW:
+	return "New Vyper";
+
+    case HW_VYTEC:
+	return "Vytec";
+
+    case HW_VYPER_OR_COBRA:
+	return "Vyper/Cobra";
+
+    case HW_GEKKO:
+	return "Gekko";
+
+    default:
+	return "Unknown";
+    }
+}
+
+std::string
+Vyper::getHWTypeName()
+{
+    return getHWTypeName(getHWType());
+}
+
+uint8_t
+Vyper::getFWVersion()
+{
+    return getInfo().fwVersion;
+}
+
+uint8_t
+Vyper::getLogInterval()
+{
+    return getInfo().logInterval;
+}
+
+Duration
+Vyper::getAlarmTime()
+{
+    return Duration::minutes(SUUNTO_SWAP16(getInfo().alarmTime));
+}
+
+bool
+Vyper::getAlarmTimeOn()
+{
+    return getInfo().alarmFlags & VYPER_ALARM_FLAG_TIME;
+}
+
+Length
+Vyper::getAlarmDepth()
+{
+    return Length::feet(SUUNTO_SWAP16(getInfo().alarmDepth) / 128.0);
+}
+
+bool
+Vyper::getAlarmDepthOn()
+{
+    return getInfo().alarmFlags & VYPER_ALARM_FLAG_DEPTH;
 }
 
 const Vyper::Info &
