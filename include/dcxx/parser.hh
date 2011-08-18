@@ -69,8 +69,8 @@ public:
     virtual void onSample(Parser &parser,
 			  parser_sample_type_t type, parser_sample_value_t value);
 
-    virtual void onBeginSample() {};
-    virtual void onEndSample() {};
+    virtual void onBeginSample() {}
+    virtual void onEndSample() {}
 
     virtual void onTime(Duration time) {}
     virtual void onDepth(Length depth) {}
