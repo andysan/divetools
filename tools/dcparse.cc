@@ -42,6 +42,7 @@
 #include "dev_common.hh"
 #include "dcconf.hh"
 #include "serialize/csv.hh"
+#include "serialize/text.hh"
 
 using namespace std;
 using namespace dcxx;
@@ -182,7 +183,10 @@ setFileData(Parser &parser, boost::scoped_array<char> &data)
 static void
 outputText(Parser &parser)
 {
+    SerializeText ser(cout);
     Parser::GasMixVector mixes;
+
+    parser.setCallbackHandler(&ser);
     parser.getGasMixes(mixes);
 
     cerr << "Dive info:" << endl
