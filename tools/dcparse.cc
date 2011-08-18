@@ -43,6 +43,7 @@
 #include "dcconf.hh"
 #include "serialize/csv.hh"
 #include "serialize/text.hh"
+#include "serialize/uddf.hh"
 
 using namespace std;
 using namespace dcxx;
@@ -53,6 +54,7 @@ namespace bfs = boost::filesystem;
 enum OutputFormat {
     FMT_TEXT,
     FMT_CSV,
+    FMT_UDDF,
 };
 
 DCConf dcconf;
@@ -132,6 +134,8 @@ parse_args(int argc, char **argv)
 		optFormat = FMT_TEXT;
 	    else if (fmt == "csv")
 		optFormat = FMT_CSV;
+	    else if (fmt == "uddf")
+		optFormat = FMT_UDDF;
 	    else if (fmt == "help") {
 		cout << "Supported output formats:" << endl;
 		cout << "\ttext\tOutput dive in plain text" << endl;
@@ -246,6 +250,11 @@ main(int argc, char **argv)
 	case FMT_CSV:
 	    outputCSV(*parser);
 	    break;
+	case FMT_UDDF: {
+	    SerializeUDDF ser(cout, *parser);
+	    parser->setCallbackHandler(&ser);
+	    parser->forEachSample();
+	} break;
 	}
     } catch (DeviceException e) {
 	cerr << "Error: " << e.what() << endl;
