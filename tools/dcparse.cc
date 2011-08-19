@@ -189,14 +189,14 @@ outputText(Parser &parser)
     parser.setCallbackHandler(&ser);
     parser.getGasMixes(mixes);
 
-    cerr << "Dive info:" << endl
+    cout << "Dive info:" << endl
 	 << "  Dive time: " << parser.getDiveTime() << endl
 	 << "  Max Depth: " << parser.getMaxDepth() << endl;
 
-    cerr << "Gas Mixes:" << endl;
+    cout << "Gas Mixes:" << endl;
 
     BOOST_FOREACH(gasmix_t mix, mixes)
-	cerr << "  He: " << mix.helium * 100.0 << "%"
+	cout << "  He: " << mix.helium * 100.0 << "%"
 	     << " O2: " << mix.oxygen * 100.0 << "%"
 	     << " N2: " << mix.nitrogen * 100.0 << "%" << endl;
 
