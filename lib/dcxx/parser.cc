@@ -32,6 +32,7 @@
 #include <dcxx/utils.hh>
 
 #include <stdlib.h>
+#include <cstring>
 
 DCXX_BEGIN_NS_DC
 
@@ -210,6 +211,26 @@ Parser::getGasMixes(GasMixVector &mixes) throw(ParserException)
     mixes.resize(count);
     for (unsigned int i = 0; i < count; i++)
 	getField(FIELD_TYPE_GASMIX, i, &mixes[i]);
+}
+
+time_t
+Parser::getDateTime() throw(ParserException)
+{
+    dc_datetime_t dt;
+    struct tm tm;
+
+    DCXX_PARSER_TRY(parser_get_datetime(parser, &dt));
+
+    memset(&tm, 0, sizeof(tm));
+    tm.tm_year = dt.year - 1900;
+    tm.tm_mon = dt.month - 1;
+    tm.tm_mday = dt.day;
+    tm.tm_hour = dt.hour;
+    tm.tm_min = dt.minute;
+    tm.tm_sec = dt.second;
+    tm.tm_isdst = -1;
+
+    return mktime(&tm);
 }
 
 void

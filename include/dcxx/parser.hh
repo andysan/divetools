@@ -35,6 +35,7 @@
 #include <dcxx/types.hh>
 #include <libdivecomputer/parser.h>
 
+#include <ctime>
 #include <vector>
 
 #define DCXX_PARSER_TRY(call)			\
@@ -112,7 +113,19 @@ public:
 	GasMixVector mixes;
 	return getGasMixes(mixes);
     }
-    
+
+    /**
+     * Return a standard time_t representing when the dive started
+     *
+     * Return when the dive started as seconds since the epoch. Note
+     * that we don't have information about the time zone in most dive
+     * computers, we there have to make the assumption that the
+     * computer parsing the data is in the same time zone as the dive
+     * computer.
+     *
+     * @return A time_t representing when the dive started
+     */
+    time_t getDateTime() throw(ParserException);
 
 protected:
     Parser(parser_t *parser);
