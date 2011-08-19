@@ -199,6 +199,8 @@ outputText(Parser &parser)
 	cerr << "  He: " << mix.helium * 100.0 << "%"
 	     << " O2: " << mix.oxygen * 100.0 << "%"
 	     << " N2: " << mix.nitrogen * 100.0 << "%" << endl;
+
+    parser.forEachSample();
 }
 
 static void
