@@ -45,8 +45,6 @@
 
 using namespace std;
 
-// TODO: Implement support for alarms
-
 namespace uddf {
     const static char *alarm_names[] = {
 	"ascent",
@@ -61,19 +59,22 @@ namespace uddf {
     };
 
     enum AlarmType {
-	ALARM_ASCENT = 0,
-	ALARM_BREATH,
-	ALARM_DECO,
-	ALARM_ERROR,
-	ALARM_LINK_LOST,
-	ALARM_MICROBUBBLES,
-	ALARM_RBT,
-	ALARM_SKIN_COOLING,
-	ALARM_SURFACE,
+	ALARM_ASCENT = 0,   //< Ascent too fast
+	ALARM_BREATH,       //< Breatingh frequency too high
+	ALARM_DECO,         //< Deco stop announced
+	ALARM_ERROR,        //< General error (e.g. deco stop missed)
+	ALARM_LINK_LOST,    //< Wireless link to pressure gauge lost
+	ALARM_MICROBUBBLES, //< Estimated degree of microbubble dagner (see UDDF manual)
+	ALARM_RBT,          //< Remaining bottom time exceeded
+	ALARM_SKIN_COOLING, //< Estimated degree of skin cooling (see UDDF manual)
+	ALARM_SURFACE,      //< Surface reached
     };
 
     struct Alarm
     {
+	Alarm(AlarmType _type)
+	    : type(_type) {}
+
 	AlarmType type;
 	ValidValue<double> value;
 	ValidValue<string> tankref;
@@ -89,6 +90,7 @@ namespace uddf {
 
 	ValidValue<double> heading;
 	ValidValue<dcxx::Temperature> temperature;
+	list<Alarm> alarms;
     };
 
     struct InformationBeforeDive
@@ -184,9 +186,24 @@ namespace uddf {
 }
 
 xml::ContentHandler &
+operator<<(xml::ContentHandler &out, const uddf::Alarm &alarm)
+{
+    xml::ScopedElement e(out, "alarm");
+
+    if (alarm.value)
+	out.attribute("value", alarm.value.get());
+
+    if (alarm.tankref)
+	out.attribute("tankref", alarm.tankref.get());
+
+    assert(alarm.type < sizeof(uddf::alarm_names) / sizeof(*uddf::alarm_names));
+    out.text(uddf::alarm_names[alarm.type]);
+}
+
+xml::ContentHandler &
 operator<<(xml::ContentHandler &out, const uddf::Waypoint &wp)
 {
-    xml::ScopedElement ibd(out, "waypoint");
+    xml::ScopedElement e(out, "waypoint");
 
     out.simpleTextElement("divetime", wp.divetime.seconds());
     out.simpleTextElement("depth", wp.depth.metre());
@@ -197,13 +214,16 @@ operator<<(xml::ContentHandler &out, const uddf::Waypoint &wp)
     if (wp.temperature)
 	out.simpleTextElement("temperature", wp.temperature.get().kelvin());
 
+    BOOST_FOREACH(const uddf::Alarm &alarm, wp.alarms)
+	out << alarm;
+
     return out;
 }
 
 xml::ContentHandler &
 operator<<(xml::ContentHandler &out, const uddf::InformationBeforeDive &info)
 {
-    xml::ScopedElement ibd(out, "informationbeforedive");
+    xml::ScopedElement e(out, "informationbeforedive");
 
     out.simpleTextElement("datetime", info.datetime);
 
@@ -358,6 +378,72 @@ SerializeUDDF::onSample(const Sample &sample)
 
     assert(currentDive);
     currentDive->samples.push_back(wp);
+}
+
+void
+SerializeUDDF::onEvent(parser_sample_event_t type, dcxx::Duration time,
+		       unsigned int flags, unsigned int value)
+{
+    assert(type != SAMPLE_EVENT_NONE);
+    assert(currentDive);
+    assert(!currentDive->samples.empty());
+
+    uddf::Waypoint &wp(currentDive->samples.back());
+
+    switch (type) {
+    case SAMPLE_EVENT_NONE:
+	/* This shouldn't happen */
+	break;
+
+    case SAMPLE_EVENT_ASCENT:
+	/* Ascent too fast */
+	wp.alarms.push_back(uddf::Alarm(uddf::ALARM_ASCENT));
+	break;
+
+    case SAMPLE_EVENT_DECOSTOP:
+	/* Deco stop needed */
+	wp.alarms.push_back(uddf::Alarm(uddf::ALARM_DECO));
+	break;
+
+    case SAMPLE_EVENT_SURFACE:
+	/* Surface reached */
+	wp.alarms.push_back(uddf::Alarm(uddf::ALARM_SURFACE));
+	break;
+
+    case SAMPLE_EVENT_CEILING:
+	/* Deco voilation */
+	wp.alarms.push_back(uddf::Alarm(uddf::ALARM_ERROR));
+	break;
+
+    case SAMPLE_EVENT_CEILING_SAFETYSTOP:
+	/* Safety stop voilation */
+	/* TODO: This should probably be some other type */
+	wp.alarms.push_back(uddf::Alarm(uddf::ALARM_ASCENT));
+	break;
+
+    case SAMPLE_EVENT_VIOLATION:
+	/* General violation (warning?) */
+    case SAMPLE_EVENT_TRANSMITTER:
+    case SAMPLE_EVENT_RBT:
+    case SAMPLE_EVENT_WORKLOAD:
+    case SAMPLE_EVENT_BOOKMARK:
+    case SAMPLE_EVENT_SAFETYSTOP:
+    case SAMPLE_EVENT_GASCHANGE:
+    case SAMPLE_EVENT_SAFETYSTOP_VOLUNTARY:
+    case SAMPLE_EVENT_SAFETYSTOP_MANDATORY:
+    case SAMPLE_EVENT_DEEPSTOP:
+    case SAMPLE_EVENT_UNKNOWN:
+    case SAMPLE_EVENT_DIVETIME:
+    case SAMPLE_EVENT_MAXDEPTH:
+    case SAMPLE_EVENT_OLF:
+    case SAMPLE_EVENT_PO2:
+    case SAMPLE_EVENT_AIRTIME:
+    case SAMPLE_EVENT_RGBM:
+    case SAMPLE_EVENT_HEADING:
+    case SAMPLE_EVENT_TISSUELEVEL:
+	cerr << "Warning: Ignored unhandled event" << endl;
+	break;
+    }
 }
 
 string

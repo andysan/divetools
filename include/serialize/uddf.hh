@@ -50,6 +50,8 @@ public:
     virtual ~SerializeUDDF();
 
     void onSample(const Sample &sample);
+    void onEvent(parser_sample_event_t type, dcxx::Duration time,
+		 unsigned int flags, unsigned int value);
 
 private:
     std::string repetitionGroupID(dcxx::Parser &parser);
