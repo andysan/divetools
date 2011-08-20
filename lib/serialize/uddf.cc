@@ -103,6 +103,7 @@ namespace uddf {
 
 	ValidValue<double> heading;
 	ValidValue<dcxx::Temperature> temperature;
+	// TODO: This should probably be a set instead
 	list<Alarm> alarms;
     };
 
@@ -427,7 +428,7 @@ SerializeUDDF::onEvent(parser_sample_event_t type, dcxx::Duration time,
     assert(currentDive);
     assert(!currentDive->samples.empty());
 
-    uddf::Waypoint &wp(currentDive->samples.back());
+    list<uddf::Alarm> &alarms(currentDive->samples.back().alarms);
     set<uddf::GlobalAlarm> &galarms(currentDive->infoAfter.globalAlarmsGiven);
 
     switch (type) {
@@ -437,30 +438,30 @@ SerializeUDDF::onEvent(parser_sample_event_t type, dcxx::Duration time,
 
     case SAMPLE_EVENT_ASCENT:
 	/* Ascent too fast */
-	wp.alarms.push_back(uddf::Alarm(uddf::ALARM_ASCENT));
+	alarms.push_back(uddf::Alarm(uddf::ALARM_ASCENT));
 	galarms.insert(uddf::GlobalAlarm(uddf::GALARM_ASCENT_WARNING));
 	break;
 
     case SAMPLE_EVENT_DECOSTOP:
 	/* Deco stop needed */
-	wp.alarms.push_back(uddf::Alarm(uddf::ALARM_DECO));
+	alarms.push_back(uddf::Alarm(uddf::ALARM_DECO));
 	break;
 
     case SAMPLE_EVENT_SURFACE:
 	/* Surface reached */
-	wp.alarms.push_back(uddf::Alarm(uddf::ALARM_SURFACE));
+	alarms.push_back(uddf::Alarm(uddf::ALARM_SURFACE));
 	break;
 
     case SAMPLE_EVENT_CEILING:
 	/* Deco voilation */
-	wp.alarms.push_back(uddf::Alarm(uddf::ALARM_ERROR));
+	alarms.push_back(uddf::Alarm(uddf::ALARM_ERROR));
 	galarms.insert(uddf::GlobalAlarm(uddf::GALARM_ASCENT_WARNING));
 	break;
 
     case SAMPLE_EVENT_CEILING_SAFETYSTOP:
 	/* Safety stop voilation */
 	/* TODO: This should probably be some other type */
-	wp.alarms.push_back(uddf::Alarm(uddf::ALARM_ASCENT));
+	alarms.push_back(uddf::Alarm(uddf::ALARM_ASCENT));
 	galarms.insert(uddf::GlobalAlarm(uddf::GALARM_ASCENT_WARNING));
 	break;
 
