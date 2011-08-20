@@ -38,6 +38,7 @@
 #include <string>
 #include <ctime>
 #include <list>
+#include <set>
 #include <boost/foreach.hpp>
 
 #include "valid_value.hh"
@@ -70,6 +71,18 @@ namespace uddf {
 	ALARM_SURFACE,      //< Surface reached
     };
 
+    const static char *galarm_names[] = {
+	"ascent-warning-too-long",
+	"sos-mode",
+	"work-too-hard",
+    };
+
+    enum GlobalAlarmType {
+	GALARM_ASCENT_WARNING = 0, //< Ascent velocity too high or decompression stops disregarded
+	GALARM_SOS_MODE,           //< Dive computer locked
+	GALARM_HARD_WORK,          //< Physical work too high for a prolonged time
+    };
+
     struct Alarm
     {
 	Alarm(AlarmType _type)
@@ -98,6 +111,18 @@ namespace uddf {
 	time_t datetime;
     };
 
+    struct GlobalAlarm
+    {
+	GlobalAlarm(GlobalAlarmType _type)
+	    : type(_type) {}
+
+	bool operator<(const GlobalAlarm &rhs) const {
+	    return type < rhs.type;
+	}
+
+	GlobalAlarmType type;
+    };
+
     struct InformationAfterDive
     {
 	dcxx::Duration diveDuration;
@@ -105,7 +130,7 @@ namespace uddf {
 	ValidValue<double> highestPO2;
 	ValidValue<dcxx::Temperature> lowestTemperature;
 
-	// TODO: Support global alarms
+	set<GlobalAlarm> globalAlarmsGiven;
     };
 
     struct ApplicationData
@@ -230,6 +255,14 @@ operator<<(xml::ContentHandler &out, const uddf::InformationBeforeDive &info)
     return out;
 }
 
+xml::ContentHandler &
+operator<<(xml::ContentHandler &out, const uddf::GlobalAlarm &alarm)
+{
+    xml::ScopedElement e(out, "globalalarm");
+
+    assert(alarm.type < sizeof(uddf::galarm_names) / sizeof(*uddf::galarm_names));
+    out.text(uddf::galarm_names[alarm.type]);
+}
 
 xml::ContentHandler &
 operator<<(xml::ContentHandler &out, const uddf::InformationAfterDive &info)
@@ -244,6 +277,12 @@ operator<<(xml::ContentHandler &out, const uddf::InformationAfterDive &info)
 
     if (info.lowestTemperature)
 	out.simpleTextElement("lowesttemperature", info.lowestTemperature.get().kelvin());
+
+    if (!info.globalAlarmsGiven.empty()) {
+	xml::ScopedElement e_alarms(out, "globalalarmsgiven");
+	BOOST_FOREACH(const uddf::GlobalAlarm &alarm, info.globalAlarmsGiven)
+	    out << alarm;
+    }
 
     return out;
 }
@@ -389,6 +428,7 @@ SerializeUDDF::onEvent(parser_sample_event_t type, dcxx::Duration time,
     assert(!currentDive->samples.empty());
 
     uddf::Waypoint &wp(currentDive->samples.back());
+    set<uddf::GlobalAlarm> &galarms(currentDive->infoAfter.globalAlarmsGiven);
 
     switch (type) {
     case SAMPLE_EVENT_NONE:
@@ -398,6 +438,7 @@ SerializeUDDF::onEvent(parser_sample_event_t type, dcxx::Duration time,
     case SAMPLE_EVENT_ASCENT:
 	/* Ascent too fast */
 	wp.alarms.push_back(uddf::Alarm(uddf::ALARM_ASCENT));
+	galarms.insert(uddf::GlobalAlarm(uddf::GALARM_ASCENT_WARNING));
 	break;
 
     case SAMPLE_EVENT_DECOSTOP:
@@ -413,19 +454,28 @@ SerializeUDDF::onEvent(parser_sample_event_t type, dcxx::Duration time,
     case SAMPLE_EVENT_CEILING:
 	/* Deco voilation */
 	wp.alarms.push_back(uddf::Alarm(uddf::ALARM_ERROR));
+	galarms.insert(uddf::GlobalAlarm(uddf::GALARM_ASCENT_WARNING));
 	break;
 
     case SAMPLE_EVENT_CEILING_SAFETYSTOP:
 	/* Safety stop voilation */
 	/* TODO: This should probably be some other type */
 	wp.alarms.push_back(uddf::Alarm(uddf::ALARM_ASCENT));
+	galarms.insert(uddf::GlobalAlarm(uddf::GALARM_ASCENT_WARNING));
 	break;
 
     case SAMPLE_EVENT_VIOLATION:
 	/* General violation (warning?) */
+	galarms.insert(uddf::GlobalAlarm(uddf::GALARM_ASCENT_WARNING));
+	break;
+
+    case SAMPLE_EVENT_WORKLOAD:
+	/* Work too hard */
+	galarms.insert(uddf::GlobalAlarm(uddf::GALARM_HARD_WORK));
+	break;
+
     case SAMPLE_EVENT_TRANSMITTER:
     case SAMPLE_EVENT_RBT:
-    case SAMPLE_EVENT_WORKLOAD:
     case SAMPLE_EVENT_BOOKMARK:
     case SAMPLE_EVENT_SAFETYSTOP:
     case SAMPLE_EVENT_GASCHANGE:
